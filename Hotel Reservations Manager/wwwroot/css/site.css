@@ -1,0 +1,194 @@
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/* Sidebar Styles */
+.wrapper {
+  min-height: 100vh;
+}
+
+.sidebar {
+  min-width: 250px;
+  max-width: 250px;
+  min-height: 100vh;
+  transition: all 0.3s;
+}
+
+.sidebar .list-group-item {
+  border-radius: 0;
+  border: none;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.sidebar .list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-left: 3px solid #007bff;
+}
+
+.sidebar .list-group-item.active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-left: 3px solid #007bff;
+}
+
+#page-content-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrapper.toggled .sidebar {
+  margin-left: -250px;
+}
+
+/* Card styling */
+.card {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-header {
+  font-weight: 600;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard stats */
+.stats-card {
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.stats-card .icon {
+  font-size: 2.5rem;
+  opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    margin-left: -250px;
+  }
+  
+  .wrapper.toggled .sidebar {
+    margin-left: 0;
+  }
+  
+  .card-deck {
+    flex-direction: column;
+  }
+}
+
+/* Table styling */
+.table {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+}
+
+/* Badge styling */
+.badge {
+  padding: 6px 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Button styling */
+.btn {
+  border-radius: 5px;
+  padding: 0.45rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #3f51b5;
+  border-color: #3f51b5;
+}
+
+.btn-primary:hover {
+  background-color: #303f9f;
+  border-color: #303f9f;
+}
+
+.btn-success {
+  background-color: #4caf50;
+  border-color: #4caf50;
+}
+
+.btn-success:hover {
+  background-color: #43a047;
+  border-color: #43a047;
+}
+
+.btn-danger {
+  background-color: #f44336;
+  border-color: #f44336;
+}
+
+.btn-danger:hover {
+  background-color: #e53935;
+  border-color: #e53935;
+}
+
+/* Form styling */
+.form-control {
+  border-radius: 5px;
+  padding: 0.6rem 0.75rem;
+}
+
+.form-control:focus {
+  border-color: #3f51b5;
+  box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+}
+
+/* Login/Register form */
+.auth-form {
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Pagination */
+.pagination .page-link {
+  color: #3f51b5;
+  border-radius: 5px;
+  margin: 0 3px;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #3f51b5;
+  border-color: #3f51b5;
+}

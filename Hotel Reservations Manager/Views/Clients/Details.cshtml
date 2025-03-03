@@ -1,0 +1,99 @@
+@model Hotel_Reservations_Manager.Data.Models.Client
+
+@{
+    ViewData["Title"] = "Client Details";
+}
+
+<h1>Client Details</h1>
+
+<div>
+    <h4>@Model.FirstName @Model.LastName</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">First Name</dt>
+        <dd class="col-sm-9">@Model.FirstName</dd>
+        
+        <dt class="col-sm-3">Last Name</dt>
+        <dd class="col-sm-9">@Model.LastName</dd>
+        
+        <dt class="col-sm-3">Phone Number</dt>
+        <dd class="col-sm-9">@Model.PhoneNumber</dd>
+        
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+        
+        <dt class="col-sm-3">Adult/Child</dt>
+        <dd class="col-sm-9">
+            <span class="badge @(Model.IsAdult ? "bg-primary" : "bg-info")">
+                @(Model.IsAdult ? "Adult" : "Child")
+            </span>
+        </dd>
+    </dl>
+</div>
+
+<h4 class="mt-4">Reservations</h4>
+
+@if (Model.ReservationClients != null && Model.ReservationClients.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Room</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Other Guests</th>
+                <th>Total Amount</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rc in Model.ReservationClients.OrderByDescending(rc => rc.Reservation.CheckInDate))
+            {
+                <tr>
+                    <td>Room #@rc.Reservation.Room.RoomNumber</td>
+                    <td>@rc.Reservation.CheckInDate.ToShortDateString()</td>
+                    <td>@rc.Reservation.CheckOutDate.ToShortDateString()</td>
+                    <td>
+                        @{
+                            var otherClients = rc.Reservation.ReservationClients
+                                .Where(x => x.ClientId != Model.Id)
+                                .Select(x => x.Client)
+                                .ToList();
+                        }
+                        
+                        @if (otherClients.Any())
+                        {
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var client in otherClients.Take(3))
+                                {
+                                    <li>@client.FirstName @client.LastName</li>
+                                }
+                                @if (otherClients.Count > 3)
+                                {
+                                    <li>And @(otherClients.Count - 3) more...</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>No other guests</span>
+                        }
+                    </td>
+                    <td>@rc.Reservation.TotalAmount.ToString("C")</td>
+                    <td>
+                        <a asp-controller="Reservations" asp-action="Details" asp-route-id="@rc.Reservation.Id" class="btn btn-sm btn-info">Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No reservations found for this client.</p>
+}
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</div> 

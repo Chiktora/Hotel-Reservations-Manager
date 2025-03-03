@@ -1,0 +1,154 @@
+@model Hotel_Reservations_Manager.Data.Models.Reservation
+
+@{
+    ViewData["Title"] = "Create Reservation";
+}
+
+<h1>Create Reservation</h1>
+
+@if (ViewBag.ErrorDetails != null && ViewBag.ErrorDetails.Count > 0)
+{
+    <div class="alert alert-danger">
+        <h4>Reservation could not be created</h4>
+        <p>The following issues were detected:</p>
+        <ul>
+            @foreach (var detail in ViewBag.ErrorDetails)
+            {
+                <li>@detail</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group">
+                <label class="control-label">Room</label>
+                <select name="RoomId" id="roomSelect" class="form-control">
+                    <option value="">-- Select Room --</option>
+                    @if (ViewBag.Rooms != null)
+                    {
+                        foreach (var room in ViewBag.Rooms)
+                        {
+                            if (Model?.RoomId == room.Id)
+                            {
+                                <option value="@room.Id" selected>Room @room.RoomNumber (Capacity: @room.Capacity)</option>
+                            }
+                            else
+                            {
+                                <option value="@room.Id">Room @room.RoomNumber (Capacity: @room.Capacity)</option>
+                            }
+                        }
+                    }
+                </select>
+                <small class="form-text text-muted">Select a room with enough capacity for all clients</small>
+                <span asp-validation-for="RoomId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label class="control-label">Clients</label>
+                <select name="clientIds" id="clientsSelect" class="form-control" multiple>
+                    @if (ViewBag.Clients != null)
+                    {
+                        foreach (var client in ViewBag.Clients)
+                        {
+                            bool isSelected = ViewBag.ClientIds != null && 
+                                             ((IEnumerable<SelectListItem>)ViewBag.ClientIds)
+                                             .Any(i => i.Selected && i.Value == client.Id.ToString());
+                                             
+                            if (isSelected)
+                            {
+                                <option value="@client.Id" selected>@(client.FirstName + " " + client.LastName)</option>
+                            }
+                            else
+                            {
+                                <option value="@client.Id">@(client.FirstName + " " + client.LastName)</option>
+                            }
+                        }
+                    }
+                </select>
+                <small class="form-text text-muted">Hold Ctrl to select multiple clients (Selected: <span id="selectedCount">0</span>)</small>
+                <span class="text-danger field-validation-error" id="clientValidationMessage"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="CheckInDate" class="control-label">Check-in Date</label>
+                <input asp-for="CheckInDate" class="form-control" type="date" />
+                <span asp-validation-for="CheckInDate" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="CheckOutDate" class="control-label">Check-out Date</label>
+                <input asp-for="CheckOutDate" class="form-control" type="date" />
+                <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group form-check">
+                <input class="form-check-input" asp-for="BreakfastIncluded" />
+                <label class="form-check-label" asp-for="BreakfastIncluded">Breakfast Included</label>
+            </div>
+            
+            <div class="form-group form-check">
+                <input class="form-check-input" asp-for="AllInclusive" />
+                <label class="form-check-label" asp-for="AllInclusive">All Inclusive</label>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" id="submitButton" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Update selected count on page load
+            updateSelectedClientCount();
+            
+            // Update selected count and validate when selection changes
+            $('#clientsSelect').on('change', function() {
+                updateSelectedClientCount();
+                validateRoomCapacity();
+            });
+            
+            // Validate room capacity when room selection changes
+            $('#roomSelect').on('change', function() {
+                validateRoomCapacity();
+            });
+            
+            // Function to update the selected client count
+            function updateSelectedClientCount() {
+                var count = $('#clientsSelect option:selected').length;
+                $('#selectedCount').text(count);
+            }
+            
+            // Function to validate room capacity against selected clients
+            function validateRoomCapacity() {
+                var selectedRoom = $('#roomSelect option:selected');
+                var roomText = selectedRoom.text();
+                var capacityMatch = roomText.match(/Capacity: (\d+)/);
+                
+                // Only validate if we can determine capacity
+                if (capacityMatch && capacityMatch.length > 1) {
+                    var capacity = parseInt(capacityMatch[1]);
+                    var selectedClients = $('#clientsSelect option:selected').length;
+                    
+                    if (selectedClients > capacity) {
+                        $('#clientValidationMessage').text('Warning: You have selected more clients (' + 
+                            selectedClients + ') than the room capacity (' + capacity + ')');
+                        // Don't disable the button, just warn
+                    } else {
+                        $('#clientValidationMessage').text('');
+                    }
+                }
+            }
+        });
+    </script>
+} 

@@ -1,0 +1,188 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stats-card h-100 bg-primary text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs text-white-50 text-uppercase mb-1">Total Rooms</div>
+                        <div class="h3 mb-0 font-weight-bold">@ViewBag.TotalRooms</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-door-open fa-2x text-white-50"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <a href="@Url.Action("Index", "Rooms")" class="text-white stretched-link">View all rooms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stats-card h-100 bg-success text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs text-white-50 text-uppercase mb-1">Available Rooms</div>
+                        <div class="h3 mb-0 font-weight-bold">@ViewBag.AvailableRooms</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-white-50"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <a href="@Url.Action("Index", "Rooms", new { isAvailable = true })" class="text-white stretched-link">View available rooms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stats-card h-100 bg-info text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs text-white-50 text-uppercase mb-1">Total Reservations</div>
+                        <div class="h3 mb-0 font-weight-bold">@ViewBag.TotalReservations</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-check fa-2x text-white-50"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <a href="@Url.Action("Index", "Reservations")" class="text-white stretched-link">View all reservations</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stats-card h-100 bg-warning text-white">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs text-white-50 text-uppercase mb-1">Upcoming Check-ins</div>
+                        <div class="h3 mb-0 font-weight-bold">@ViewBag.UpcomingCheckIns</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-sign-in-alt fa-2x text-white-50"></i>
+                    </div>
+                </div>
+                <div class="mt-3 small">
+                    <a href="@Url.Action("UpcomingCheckIns", "Reservations")" class="text-white stretched-link">View upcoming check-ins</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold">Upcoming Reservations</h6>
+                <a href="@Url.Action("Index", "Reservations")" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.UpcomingReservations != null && ViewBag.UpcomingReservations.Count > 0)
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Client(s)</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var reservation in ViewBag.UpcomingReservations)
+                                {
+                                    <tr>
+                                        <td>@reservation.Room.RoomNumber</td>
+                                        <td>@reservation.CheckInDate.ToShortDateString()</td>
+                                        <td>@reservation.CheckOutDate.ToShortDateString()</td>
+                                        <td>
+                                            @{
+                                                var clientNames = new List<string>();
+                                                foreach (var rc in reservation.ReservationClients)
+                                                {
+                                                    clientNames.Add(rc.Client.FirstName + " " + rc.Client.LastName);
+                                                }
+                                            }
+                                            @string.Join(", ", clientNames)
+                                        </td>
+                                        <td>@reservation.TotalAmount.ToString("C")</td>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Reservations", new { id = reservation.Id })" class="btn btn-sm btn-info">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-day fa-3x text-muted mb-3"></i>
+                        <p class="mb-0">No upcoming reservations found.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="@Url.Action("Create", "Reservations")" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i> New Reservation
+                    </a>
+                    <a href="@Url.Action("Create", "Clients")" class="btn btn-info text-white">
+                        <i class="fas fa-user-plus me-2"></i> Add New Client
+                    </a>
+                    <a href="@Url.Action("RoomAvailability", "Rooms")" class="btn btn-success">
+                        <i class="fas fa-search me-2"></i> Check Room Availability
+                    </a>
+                    <a href="@Url.Action("Dashboard", "Reservations")" class="btn btn-secondary">
+                        <i class="fas fa-chart-bar me-2"></i> Reservation Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold">System Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Server Time</span>
+                    <span>@DateTime.Now.ToString("f")</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">System Version</span>
+                    <span>v1.2.0</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Current User</span>
+                    <span>@(User?.Identity?.IsAuthenticated == true ? User.Identity.Name : "Guest")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

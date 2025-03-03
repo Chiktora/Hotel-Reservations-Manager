@@ -1,0 +1,114 @@
+@model Hotel_Reservations_Manager.Data.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<h1>Edit User</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label asp-for="FirstName" class="control-label">First Name</label>
+                            <input asp-for="FirstName" class="form-control" required />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label asp-for="MiddleName" class="control-label">Middle Name</label>
+                            <input asp-for="MiddleName" class="form-control" />
+                            <span asp-validation-for="MiddleName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label asp-for="LastName" class="control-label">Last Name</label>
+                            <input asp-for="LastName" class="form-control" required />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label asp-for="PersonalId" class="control-label">Personal ID</label>
+                        <input asp-for="PersonalId" class="form-control" required />
+                        <span asp-validation-for="PersonalId" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label asp-for="Email" class="control-label">Email</label>
+                        <input asp-for="Email" class="form-control" required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label asp-for="PhoneNumber" class="control-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" required />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Employment Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label>Hire Date</label>
+                        <input class="form-control" value="@Model.HireDate.ToShortDateString()" readonly />
+                    </div>
+                    @if (Model.ReleaseDate.HasValue)
+                    {
+                        <div class="form-group mt-3">
+                            <label>Release Date</label>
+                            <input class="form-control" value="@Model.ReleaseDate.Value.ToShortDateString()" readonly />
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Roles</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var role in ViewBag.AllRoles)
+                    {
+                        bool isChecked = ((List<string>)ViewBag.UserRoles).Contains(role.Name);
+                        <div class="form-check">
+                            <input type="checkbox" name="roles" value="@role.Name" class="form-check-input" id="role_@role.Id" @(isChecked ? "checked" : "") />
+                            <label class="form-check-label" for="role_@role.Id">@role.Name</label>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

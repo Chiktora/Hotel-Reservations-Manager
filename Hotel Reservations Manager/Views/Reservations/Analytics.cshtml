@@ -1,0 +1,350 @@
+@{
+    ViewData["Title"] = "Reservation Analytics";
+    
+    // Define month names for use in script and data preparation
+    var monthNames = new[] {
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+    
+    // Prepare data for charts
+    var revenueData = new List<double>();
+    foreach (var month in monthNames)
+    {
+        if (ViewBag.MonthlyRevenue != null && ViewBag.MonthlyRevenue.ContainsKey(month))
+        {
+            revenueData.Add(Convert.ToDouble(ViewBag.MonthlyRevenue[month]));
+        }
+        else
+        {
+            revenueData.Add(0);
+        }
+    }
+    
+    // Prepare room type data
+    var roomTypeLabels = new List<string>();
+    var roomTypeData = new List<int>();
+    
+    if (ViewBag.RoomTypeDistribution != null)
+    {
+        foreach (var item in ViewBag.RoomTypeDistribution)
+        {
+            roomTypeLabels.Add(item.Key);
+            roomTypeData.Add(item.Value);
+        }
+    }
+    
+    // Prepare occupancy data
+    var occupancyDays = new List<int>();
+    var occupancyRates = new List<int>();
+    
+    if (ViewBag.OccupancyTrend != null)
+    {
+        foreach (var item in ViewBag.OccupancyTrend)
+        {
+            occupancyDays.Add(item.Key);
+            occupancyRates.Add(item.Value);
+        }
+    }
+}
+
+@section Styles {
+    <!-- Chart.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Advanced Analytics</h5>
+        <div class="btn-group">
+            <a href="@Url.Action("Dashboard")" class="btn btn-outline-secondary">
+                <i class="fas fa-chart-bar me-2"></i> Dashboard
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Date Range Selection -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="year" class="form-label">Year</label>
+                        <select id="year" name="year" class="form-select">
+                            @foreach (var year in ViewBag.AvailableYears)
+                            {
+                                if (year == ViewBag.SelectedYear)
+                                {
+                                    <option value="@year" selected>@year</option>
+                                }
+                                else
+                                {
+                                    <option value="@year">@year</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="month" class="form-label">Month</label>
+                        <select id="month" name="month" class="form-select">
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                if (i == ViewBag.SelectedMonth)
+                                {
+                                    <option value="@i" selected>
+                                        @(new DateTime(2022, i, 1).ToString("MMMM"))
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="@i">
+                                        @(new DateTime(2022, i, 1).ToString("MMMM"))
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i> Apply
+                        </button>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" id="exportBtn" class="btn btn-outline-success w-100">
+                            <i class="fas fa-file-excel me-2"></i> Export Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Analytics Overview Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle p-3 mb-3">
+                            <i class="fas fa-calendar-check fa-2x text-primary"></i>
+                        </div>
+                        <h5>Average Stay</h5>
+                        <h2 class="display-6 fw-bold">@ViewBag.AverageStayDuration</h2>
+                        <p class="text-muted">days per reservation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle p-3 mb-3">
+                            <i class="fas fa-calendar-times fa-2x text-danger"></i>
+                        </div>
+                        <h5>Cancellation Rate</h5>
+                        <h2 class="display-6 fw-bold">@ViewBag.CancellationRate%</h2>
+                        <p class="text-muted">of all reservations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle p-3 mb-3">
+                            <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                        </div>
+                        <h5>Monthly Revenue</h5>
+                        <h2 class="display-6 fw-bold">
+                            @{
+                                var monthlyTotal = ViewBag.MonthlyRevenue.ContainsKey(ViewBag.MonthName) 
+                                    ? ViewBag.MonthlyRevenue[ViewBag.MonthName] 
+                                    : 0m;
+                            }
+                            @monthlyTotal.ToString("C0")
+                        </h2>
+                        <p class="text-muted">for @ViewBag.MonthName @ViewBag.SelectedYear</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-info-subtle p-3 mb-3">
+                            <i class="fas fa-bed fa-2x text-info"></i>
+                        </div>
+                        <h5>Room Types</h5>
+                        <h2 class="display-6 fw-bold">@ViewBag.RoomTypeDistribution.Count</h2>
+                        <p class="text-muted">types with bookings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row">
+            <!-- Revenue by Month Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Revenue by Month (@ViewBag.SelectedYear)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Type Distribution Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Room Type Distribution (@ViewBag.MonthName)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="roomTypeChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Occupancy Trend Chart -->
+            <div class="col-md-12 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Occupancy Trend (@ViewBag.MonthName @ViewBag.SelectedYear)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="occupancyTrendChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // Revenue by Month Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const monthNames = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(monthNames));
+        const revenueData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(revenueData));
+        
+        new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: 'Revenue',
+                    data: revenueData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Room Type Distribution Chart
+        const roomTypeCtx = document.getElementById('roomTypeChart').getContext('2d');
+        const roomTypeLabels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(roomTypeLabels));
+        const roomTypeData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(roomTypeData));
+        
+        new Chart(roomTypeCtx, {
+            type: 'pie',
+            data: {
+                labels: roomTypeLabels,
+                datasets: [{
+                    data: roomTypeData,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        
+        // Occupancy Trend Chart
+        const occupancyCtx = document.getElementById('occupancyTrendChart').getContext('2d');
+        const occupancyDays = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(occupancyDays));
+        const occupancyRates = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(occupancyRates));
+        
+        // Convert day of year to day of month
+        const daysLabels = occupancyDays.map(dayOfYear => {
+            const date = new Date(@ViewBag.SelectedYear, 0, dayOfYear);
+            return date.getDate();
+        });
+        
+        new Chart(occupancyCtx, {
+            type: 'line',
+            data: {
+                labels: daysLabels,
+                datasets: [{
+                    label: 'Occupancy Rate (%)',
+                    data: occupancyRates,
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Day of Month'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Occupancy Rate (%)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Export button functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            alert('Report export functionality will be implemented here');
+            // In a real application, this would trigger a download of an Excel or PDF report
+        });
+    </script>
+} 

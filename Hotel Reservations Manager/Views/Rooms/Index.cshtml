@@ -1,0 +1,134 @@
+@model IEnumerable<Hotel_Reservations_Manager.Data.Models.Room>
+
+@{
+    ViewData["Title"] = "Rooms";
+}
+
+<h1>Rooms</h1>
+
+<div class="row mb-3">
+    <div class="col-md-8">
+        <form asp-action="Index" method="get" class="form-inline">
+            <div class="form-group mr-2">
+                <label for="capacity" class="mr-2">Capacity:</label>
+                <select name="capacity" id="capacity" class="form-control">
+                    <option value="">All</option>
+                    @for (int i = 1; i <= 10; i++)
+                    {
+                        if (ViewBag.Capacity == i)
+                        {
+                            <option value="@i" selected>@i</option>
+                        }
+                        else
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="form-group mr-2">
+                <label for="type" class="mr-2">Type:</label>
+                <select name="type" id="type" class="form-control">
+                    <option value="">All</option>
+                    @foreach (var type in ViewBag.RoomTypes)
+                    {
+                        if (ViewBag.Type == (int)type)
+                        {
+                            <option value="@((int)type)" selected>@type</option>
+                        }
+                        else
+                        {
+                            <option value="@((int)type)">@type</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="form-group mr-2">
+                <label for="isAvailable" class="mr-2">Availability:</label>
+                <select name="isAvailable" id="isAvailable" class="form-control">
+                    <option value="">All</option>
+                    @if (ViewBag.IsAvailable == true)
+                    {
+                        <option value="true" selected>Available</option>
+                    }
+                    else
+                    {
+                        <option value="true">Available</option>
+                    }
+                    
+                    @if (ViewBag.IsAvailable == false)
+                    {
+                        <option value="false" selected>Not Available</option>
+                    }
+                    else
+                    {
+                        <option value="false">Not Available</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-outline-secondary">Filter</button>
+            <a asp-action="Index" class="btn btn-outline-secondary ml-2">Clear</a>
+        </form>
+    </div>
+    <div class="col-md-4 text-right">
+        @if (User.IsInRole("Administrator"))
+        {
+            <a asp-action="Create" class="btn btn-primary">Create New</a>
+        }
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Room Number</th>
+            <th>Type</th>
+            <th>Capacity</th>
+            <th>Adult Price</th>
+            <th>Child Price</th>
+            <th>Availability</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.RoomNumber</td>
+                <td>@item.Type</td>
+                <td>@item.Capacity</td>
+                <td>@item.AdultBedPrice.ToString("C")</td>
+                <td>@item.ChildBedPrice.ToString("C")</td>
+                <td>
+                    <span class="badge @(item.IsAvailable ? "bg-success" : "bg-danger")">
+                        @(item.IsAvailable ? "Available" : "Not Available")
+                    </span>
+                </td>
+                <td>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a>
+                    }
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex justify-content-center mt-3">
+    <nav>
+        <ul class="pagination">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-capacity="@ViewBag.Capacity" asp-route-type="@ViewBag.Type" asp-route-isAvailable="@ViewBag.IsAvailable">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div> 

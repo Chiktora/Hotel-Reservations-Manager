@@ -1,0 +1,58 @@
+@model Hotel_Reservations_Manager.Data.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Deactivate User";
+}
+
+<h1>Deactivate User</h1>
+
+<div class="alert alert-warning">
+    <h3>Are you sure you want to deactivate this user?</h3>
+    <p>This will mark the user as inactive in the system. The user will no longer be able to log in or perform actions.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>User Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="fw-bold">Username</div>
+                        <div>@Model.UserName</div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="fw-bold">Full Name</div>
+                        <div>@Model.FirstName @Model.MiddleName @Model.LastName</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="fw-bold">Email</div>
+                        <div>@Model.Email</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="fw-bold">Phone Number</div>
+                        <div>@Model.PhoneNumber</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="fw-bold">Hire Date</div>
+                        <div>@Model.HireDate.ToShortDateString()</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form asp-action="DeactivateConfirmed" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex">
+                <button type="submit" class="btn btn-danger me-2">Deactivate</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div> 

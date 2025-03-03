@@ -1,0 +1,106 @@
+@model IEnumerable<Hotel_Reservations_Manager.Data.Models.Room>
+
+@{
+    ViewData["Title"] = "Room Availability";
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Check Room Availability</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" class="row g-3">
+            <div class="col-md-5">
+                <label for="checkInDate" class="form-label">Check-in Date</label>
+                <input type="date" class="form-control" id="checkInDate" name="checkInDate" 
+                       value="@(ViewBag.CheckInDate != null ? ((DateTime)ViewBag.CheckInDate).ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd"))" required />
+                <div class="text-danger field-validation-valid" data-valmsg-for="checkInDate" data-valmsg-replace="true"></div>
+            </div>
+            <div class="col-md-5">
+                <label for="checkOutDate" class="form-label">Check-out Date</label>
+                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" 
+                       value="@(ViewBag.CheckOutDate != null ? ((DateTime)ViewBag.CheckOutDate).ToString("yyyy-MM-dd") : DateTime.Now.AddDays(1).ToString("yyyy-MM-dd"))" required />
+                <div class="text-danger field-validation-valid" data-valmsg-for="checkOutDate" data-valmsg-replace="true"></div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i> Check Availability
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model != null)
+{
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                Available Rooms 
+                @if (ViewBag.CheckInDate != null && ViewBag.CheckOutDate != null)
+                {
+                    <span class="fs-6 text-muted">
+                        (@((DateTime)ViewBag.CheckInDate).ToShortDateString() - @((DateTime)ViewBag.CheckOutDate).ToShortDateString())
+                    </span>
+                }
+            </h5>
+            <span class="badge bg-success">@Model.Count() rooms available</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var room in Model)
+                    {
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Room @room.RoomNumber</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Type:</span>
+                                        <span class="fw-medium">@room.Type</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Capacity:</span>
+                                        <span class="fw-medium">@room.Capacity @(room.Capacity > 1 ? "persons" : "person")</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Adult Price:</span>
+                                        <span class="fw-medium">@room.AdultBedPrice.ToString("C")</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="text-muted">Child Price:</span>
+                                        <span class="fw-medium">@room.ChildBedPrice.ToString("C")</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top-0 d-flex justify-content-between">
+                                    <a href="@Url.Action("Details", "Rooms", new { id = room.Id })" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-info-circle me-1"></i> Details
+                                    </a>
+                                    <a href="@Url.Action("Create", "Reservations", new { roomId = room.Id, checkInDate = ViewBag.CheckInDate, checkOutDate = ViewBag.CheckOutDate })" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-calendar-plus me-1"></i> Book Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h5>No Available Rooms</h5>
+                    <p class="text-muted">There are no rooms available for the selected dates.</p>
+                    <p>Try selecting different dates or contact the hotel for assistance.</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

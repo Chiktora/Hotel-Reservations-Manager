@@ -1,0 +1,80 @@
+@model Hotel_Reservations_Manager.Data.Models.Reservation
+
+@{
+    ViewData["Title"] = "Delete Reservation";
+}
+
+<h1>Delete Reservation</h1>
+
+<h3 class="text-danger">Are you sure you want to delete this reservation?</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Reservation #@Model.Id</h5>
+                <span class="badge bg-info">Reservation ID: @Model.Id</span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Check-in Date</h6>
+                        <p>@Model.CheckInDate.ToString("d")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Check-out Date</h6>
+                        <p>@Model.CheckOutDate.ToString("d")</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Room</h6>
+                        <p>@(Model.Room != null ? $"Room #{Model.Room.RoomNumber} ({Model.Room.Type})" : "Room information not available")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Total Amount</h6>
+                        <p class="text-primary">$@Model.TotalAmount.ToString("F2")</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6>Clients</h6>
+                        @if (Model.ReservationClients != null && Model.ReservationClients.Any())
+                        {
+                            <ul class="list-group">
+                                @foreach (var rc in Model.ReservationClients)
+                                {
+                                    if (rc.Client != null)
+                                    {
+                                        <li class="list-group-item">
+                                            @rc.Client.FirstName @rc.Client.LastName
+                                            <span class="badge @(rc.Client.IsAdult ? "bg-primary" : "bg-info") float-end">
+                                                @(rc.Client.IsAdult ? "Adult" : "Child")
+                                            </span>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-danger">No clients associated with this reservation</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning">
+            <strong>Warning!</strong> This action cannot be undone. Deleting this reservation will permanently remove it from the system.
+        </div>
+        
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger me-2">Delete</button>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </form>
+    </div>
+</div> 

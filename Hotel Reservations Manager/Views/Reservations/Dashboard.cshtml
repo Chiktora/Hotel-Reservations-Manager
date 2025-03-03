@@ -1,0 +1,177 @@
+@{
+    ViewData["Title"] = "Reservation Analytics";
+}
+
+<div class="row mb-4">
+    <!-- Occupancy Rate Cards -->
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Occupancy Rates</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <h6 class="text-muted mb-1">Today</h6>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="position-relative" style="width: 120px; height: 120px;">
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <h2 class="mb-0">@ViewBag.TodayOccupancy%</h2>
+                                    </div>
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" stroke-width="12" />
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="@GetOccupancyColor(ViewBag.TodayOccupancy)" stroke-width="12"
+                                                stroke-dasharray="339.3" stroke-dashoffset="@(339.3 - (339.3 * ViewBag.TodayOccupancy / 100))" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2">@DateTime.Now.ToShortDateString()</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <h6 class="text-muted mb-1">This Week</h6>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="position-relative" style="width: 120px; height: 120px;">
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <h2 class="mb-0">@ViewBag.WeekOccupancy%</h2>
+                                    </div>
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" stroke-width="12" />
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="@GetOccupancyColor(ViewBag.WeekOccupancy)" stroke-width="12"
+                                                stroke-dasharray="339.3" stroke-dashoffset="@(339.3 - (339.3 * ViewBag.WeekOccupancy / 100))" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2">@ViewBag.WeekRange</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <h6 class="text-muted mb-1">This Month</h6>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div class="position-relative" style="width: 120px; height: 120px;">
+                                    <div class="position-absolute top-50 start-50 translate-middle">
+                                        <h2 class="mb-0">@ViewBag.MonthOccupancy%</h2>
+                                    </div>
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" stroke-width="12" />
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="@GetOccupancyColor(ViewBag.MonthOccupancy)" stroke-width="12"
+                                                stroke-dasharray="339.3" stroke-dashoffset="@(339.3 - (339.3 * ViewBag.MonthOccupancy / 100))" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2">@ViewBag.MonthRange</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Revenue Cards -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Revenue</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted mb-3">This Week</h6>
+                            <h3 class="text-primary">@ViewBag.WeeklyRevenue.ToString("C")</h3>
+                            <p class="text-muted mb-0">@ViewBag.WeekRange</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted mb-3">This Month</h6>
+                            <h3 class="text-primary">@ViewBag.MonthlyRevenue.ToString("C")</h3>
+                            <p class="text-muted mb-0">@ViewBag.MonthRange</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-file-download me-2"></i> Export Revenue Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check Ins -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Upcoming Check-ins</h5>
+                <a href="@Url.Action("UpcomingCheckIns")" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Room</th>
+                                <th>Date</th>
+                                <th>Client</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.UpcomingCheckIns != null && ((IEnumerable<dynamic>)ViewBag.UpcomingCheckIns).Any())
+                            {
+                                foreach (var checkIn in ViewBag.UpcomingCheckIns)
+                                {
+                                    <tr>
+                                        <td>@checkIn.Room.RoomNumber</td>
+                                        <td>@checkIn.CheckInDate.ToShortDateString()</td>
+                                        <td>
+                                            @if (checkIn.ReservationClients.Any())
+                                            {
+                                                var client = checkIn.ReservationClients.First().Client;
+                                                <span>@client.FirstName @client.LastName</span>
+                                                if (checkIn.ReservationClients.Count() > 1)
+                                                {
+                                                    <span class="text-muted ms-1">+@(checkIn.ReservationClients.Count() - 1)</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No clients</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("Details", new { id = checkIn.Id })" class="btn btn-sm btn-info">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-3">No upcoming check-ins found.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetOccupancyColor(int occupancy)
+    {
+        if (occupancy < 30) return "#ff6b6b"; // Low occupancy - red
+        if (occupancy < 70) return "#ffd166"; // Medium occupancy - yellow
+        return "#06d6a0"; // High occupancy - green
+    }
+} 

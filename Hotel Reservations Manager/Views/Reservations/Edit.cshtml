@@ -1,0 +1,176 @@
+@model Hotel_Reservations_Manager.Data.Models.Reservation
+
+@{
+    ViewData["Title"] = "Edit Reservation";
+}
+
+<h1>Edit Reservation</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="UserId" />
+            
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Reservation Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CheckInDate" class="form-label">Check-in Date</label>
+                            <input asp-for="CheckInDate" class="form-control" type="date" />
+                            <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CheckOutDate" class="form-label">Check-out Date</label>
+                            <input asp-for="CheckOutDate" class="form-control" type="date" />
+                            <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="RoomId" class="form-label">Room</label>
+                        <select asp-for="RoomId" class="form-select" asp-items="ViewBag.RoomId">
+                            <option value="">-- Select Room --</option>
+                        </select>
+                        <span asp-validation-for="RoomId" class="text-danger"></span>
+                        <div class="form-text">
+                            @if (ViewBag.Rooms != null)
+                            {
+                                <div id="roomCapacityInfo" class="mt-2"></div>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Clients</label>
+                        <select name="clientIds" id="clientIds" class="form-select" multiple>
+                            @if (ViewBag.Clients != null)
+                            {
+                                var selectedClients = ViewBag.SelectedClients as List<int> ?? new List<int>();
+                                foreach (var client in ViewBag.Clients)
+                                {
+                                    var isSelected = selectedClients.Contains(client.Id);
+                                    if (isSelected)
+                                    {
+                                        <option value="@client.Id" selected>
+                                            @client.FirstName @client.LastName (@(client.IsAdult ? "Adult" : "Child"))
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@client.Id">
+                                            @client.FirstName @client.LastName (@(client.IsAdult ? "Adult" : "Child"))
+                                        </option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple clients</div>
+                        <div id="clientCount" class="mt-2">Selected clients: 0</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="BreakfastIncluded" class="form-check-label">
+                            <input asp-for="BreakfastIncluded" class="form-check-input" type="checkbox" />
+                            Breakfast Included
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="AllInclusive" class="form-check-label">
+                            <input asp-for="AllInclusive" class="form-check-input" type="checkbox" />
+                            All Inclusive
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Reservation Summary</h5>
+            </div>
+            <div class="card-body">
+                <div id="reservationSummary">
+                    <p>Select room and clients to see summary</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Update client count when selection changes
+            $('#clientIds').change(function() {
+                const selectedClients = $(this).val();
+                const count = selectedClients ? selectedClients.length : 0;
+                $('#clientCount').text(`Selected clients: ${count}`);
+                updateRoomCapacityInfo();
+            });
+            
+            // Update room capacity info when room selection changes
+            $('#RoomId').change(function() {
+                updateRoomCapacityInfo();
+            });
+            
+            function updateRoomCapacityInfo() {
+                const roomId = $('#RoomId').val();
+                if (!roomId) {
+                    $('#roomCapacityInfo').html('');
+                    return;
+                }
+                
+                // Create a simplified room data array to avoid circular references
+                const rooms = [
+                    @if (ViewBag.Rooms != null) {
+                        foreach (var room in ViewBag.Rooms) {
+                            <text>{
+                                id: @room.Id,
+                                roomNumber: "@room.RoomNumber",
+                                capacity: @room.Capacity,
+                                type: "@room.Type",
+                                adultBedPrice: @room.AdultBedPrice.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture),
+                                childBedPrice: @room.ChildBedPrice.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)
+                            },</text>
+                        }
+                    }
+                ];
+                
+                const selectedRoom = rooms.find(r => r.id == roomId);
+                
+                if (selectedRoom) {
+                    const clientCount = $('#clientIds').val()?.length || 0;
+                    const capacityClass = clientCount > selectedRoom.capacity ? 'text-danger' : 'text-success';
+                    
+                    $('#roomCapacityInfo').html(`
+                        <div class="alert alert-info">
+                            <strong>Room #${selectedRoom.roomNumber}</strong> (${selectedRoom.type})<br>
+                            <span class="${capacityClass}">Capacity: ${selectedRoom.capacity} people</span><br>
+                            Adult Price: $${selectedRoom.adultBedPrice.toFixed(2)}<br>
+                            Child Price: $${selectedRoom.childBedPrice.toFixed(2)}
+                        </div>
+                    `);
+                }
+            }
+            
+            // Initialize
+            updateRoomCapacityInfo();
+        });
+    </script>
+} 

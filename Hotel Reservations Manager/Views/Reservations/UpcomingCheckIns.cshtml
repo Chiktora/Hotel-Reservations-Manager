@@ -1,0 +1,165 @@
+@{
+    ViewData["Title"] = "Upcoming Check-ins";
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center bg-light">
+        <h5 class="mb-0">All Upcoming Check-ins</h5>
+        <a href="@Url.Action("Dashboard")" class="btn btn-outline-secondary">
+            <i class="fas fa-chart-bar me-2"></i> Back to Dashboard
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="fromDate" class="form-label">From Date</label>
+                        <input type="date" id="fromDate" name="fromDate" class="form-control" 
+                               value="@(ViewBag.FromDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="toDate" class="form-label">To Date</label>
+                        <input type="date" id="toDate" name="toDate" class="form-control" 
+                               value="@(ViewBag.ToDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.AddDays(7).ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="searchTerm" class="form-label">Search</label>
+                        <input type="text" id="searchTerm" name="searchTerm" class="form-control" 
+                               placeholder="Search by client or room..." value="@ViewBag.SearchTerm">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i> Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Room</th>
+                        <th>Room Type</th>
+                        <th>Check-in Date</th>
+                        <th>Check-out Date</th>
+                        <th>Clients</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.UpcomingCheckIns != null && ((IEnumerable<dynamic>)ViewBag.UpcomingCheckIns).Any())
+                    {
+                        foreach (var checkIn in ViewBag.UpcomingCheckIns)
+                        {
+                            <tr>
+                                <td>@checkIn.Room.RoomNumber</td>
+                                <td>@checkIn.Room.Type.ToString()</td>
+                                <td>
+                                    <span class="text-nowrap">@checkIn.CheckInDate.ToShortDateString()</span>
+                                    <div class="small text-muted">@checkIn.CheckInDate.ToString("HH:mm")</div>
+                                </td>
+                                <td>
+                                    <span class="text-nowrap">@checkIn.CheckOutDate.ToShortDateString()</span>
+                                    <div class="small text-muted">@checkIn.CheckOutDate.ToString("HH:mm")</div>
+                                </td>
+                                <td>
+                                    @if (checkIn.ReservationClients.Any())
+                                    {
+                                        <div class="d-flex flex-column">
+                                            @foreach (var rc in checkIn.ReservationClients.Take(2))
+                                            {
+                                                <span>@rc.Client.FirstName @rc.Client.LastName</span>
+                                            }
+                                            @if (checkIn.ReservationClients.Count() > 2)
+                                            {
+                                                <span class="text-muted">+@(checkIn.ReservationClients.Count() - 2) more</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No clients</span>
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        var today = DateTime.Now.Date;
+                                        var checkInDate = checkIn.CheckInDate.Date;
+                                        var daysUntil = (checkInDate - today).Days;
+                                        
+                                        if (daysUntil <= 0)
+                                        {
+                                            <span class="badge bg-danger">Today</span>
+                                        }
+                                        else if (daysUntil <= 2)
+                                        {
+                                            <span class="badge bg-warning">@daysUntil day@(daysUntil != 1 ? "s" : "") away</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">@daysUntil days away</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Details", new { id = checkIn.Id })" class="btn btn-sm btn-info">
+                                            <i class="fas fa-info-circle"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = checkIn.Id })" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                                    <p>No upcoming check-ins found for the selected period.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+@if (ViewBag.TotalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("UpcomingCheckIns", new { page = ViewBag.CurrentPage - 1, fromDate = ViewBag.FromDate, toDate = ViewBag.ToDate, searchTerm = ViewBag.SearchTerm })">
+                    Previous
+                </a>
+            </li>
+            
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("UpcomingCheckIns", new { page = i, fromDate = ViewBag.FromDate, toDate = ViewBag.ToDate, searchTerm = ViewBag.SearchTerm })">
+                        @i
+                    </a>
+                </li>
+            }
+            
+            <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("UpcomingCheckIns", new { page = ViewBag.CurrentPage + 1, fromDate = ViewBag.FromDate, toDate = ViewBag.ToDate, searchTerm = ViewBag.SearchTerm })">
+                    Next
+                </a>
+            </li>
+        </ul>
+    </nav>
+} 

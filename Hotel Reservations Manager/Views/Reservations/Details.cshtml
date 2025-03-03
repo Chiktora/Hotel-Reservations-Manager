@@ -1,0 +1,180 @@
+@model Hotel_Reservations_Manager.Data.Models.Reservation
+
+@{
+    ViewData["Title"] = "Reservation Details";
+}
+
+<h1>Reservation Details</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Reservation #@Model.Id</h5>
+                <span class="badge bg-info">Reservation ID: @Model.Id</span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Check-in Date</h6>
+                        <p class="lead">@Model.CheckInDate.ToString("d")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Check-out Date</h6>
+                        <p class="lead">@Model.CheckOutDate.ToString("d")</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Duration</h6>
+                        <p>@((Model.CheckOutDate - Model.CheckInDate).Days) nights</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Total Amount</h6>
+                        <p class="lead text-primary">$@Model.TotalAmount.ToString("F2")</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Breakfast Included</h6>
+                        <p>
+                            @if (Model.BreakfastIncluded)
+                            {
+                                <span class="badge bg-success">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>All Inclusive</h6>
+                        <p>
+                            @if (Model.AllInclusive)
+                            {
+                                <span class="badge bg-success">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Room Information</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Room != null)
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Room Number</h6>
+                            <p class="lead">@Model.Room.RoomNumber</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Room Type</h6>
+                            <p>@Model.Room.Type</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Capacity</h6>
+                            <p>@Model.Room.Capacity people</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Pricing</h6>
+                            <p>Adult: $@Model.Room.AdultBedPrice.ToString("F2") / Child: $@Model.Room.ChildBedPrice.ToString("F2")</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-danger">Room information not available</p>
+                }
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Clients</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.ReservationClients != null && Model.ReservationClients.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rc in Model.ReservationClients)
+                                {
+                                    if (rc.Client != null)
+                                    {
+                                        <tr>
+                                            <td>@rc.Client.FirstName @rc.Client.LastName</td>
+                                            <td>@rc.Client.Email</td>
+                                            <td>@rc.Client.PhoneNumber</td>
+                                            <td>
+                                                @if (rc.Client.IsAdult)
+                                                {
+                                                    <span class="badge bg-primary">Adult</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">Child</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-danger">No clients associated with this reservation</p>
+                }
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Created By</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.User != null)
+                {
+                    <p>
+                        <strong>@Model.User.FirstName @Model.User.LastName</strong><br />
+                        @Model.User.Email<br />
+                        @Model.User.PhoneNumber
+                    </p>
+                }
+                else
+                {
+                    <p class="text-danger">User information not available</p>
+                }
+            </div>
+        </div>
+        
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div> 
