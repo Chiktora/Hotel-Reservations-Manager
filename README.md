@@ -1,8 +1,8 @@
 # 🏨 Hotel Reservations Manager
 
-![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-6.0-blue)
-![C#](https://img.shields.io/badge/C%23-10.0-purple)
-![Entity Framework Core](https://img.shields.io/badge/Entity%20Framework%20Core-6.0-orange)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-8.0-blue)
+![C#](https://img.shields.io/badge/C%23-12.0-purple)
+![Entity Framework Core](https://img.shields.io/badge/Entity%20Framework%20Core-8.0-orange)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.0-blueviolet)
 
 A comprehensive hotel management system designed to streamline reservation operations, manage room inventory, and provide analytics for hotel administrators.
@@ -42,8 +42,8 @@ A comprehensive hotel management system designed to streamline reservation opera
 
 ## 🛠️ Technology Stack
 
-- **Backend**: ASP.NET Core 6.0, C# 10
-- **ORM**: Entity Framework Core 6.0
+- **Backend**: ASP.NET Core 8.0, C# 12
+- **ORM**: Entity Framework Core 8.0
 - **Database**: SQL Server
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Authentication**: ASP.NET Core Identity
@@ -52,7 +52,7 @@ A comprehensive hotel management system designed to streamline reservation opera
 
 ## 📋 Prerequisites
 
-- .NET 6.0 SDK or later
+- .NET 8.0 SDK or later
 - SQL Server/SQL Server Express
 - Visual Studio 2022 or any compatible IDE
 
