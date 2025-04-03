@@ -1,0 +1,35 @@
+@model Hotel_Reservations_Manager.Data.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Reactivate User";
+}
+
+<div class="container mt-4">
+    <h1>Reactivate User</h1>
+
+    <div class="alert alert-info">
+        <h4>Are you sure you want to reactivate this user?</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">@($"{Model.FirstName} {Model.LastName}")</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Phone Number</dt>
+            <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-3">Release Date</dt>
+            <dd class="col-sm-9">@Model.ReleaseDate?.ToString("dd/MM/yyyy")</dd>
+        </dl>
+    </div>
+
+    <form asp-action="ReactivateConfirmed">
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <button type="submit" class="btn btn-success">Reactivate</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div> 

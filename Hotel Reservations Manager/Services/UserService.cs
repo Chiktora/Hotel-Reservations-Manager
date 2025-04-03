@@ -87,5 +87,17 @@ namespace Hotel_Reservations_Manager.Services
             var user = await _context.Users.FindAsync(id);
             return user?.IsActive ?? false;
         }
+
+        public async Task ReactivateUserAsync(string id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user != null)
+            {
+                user.IsActive = true;
+                user.ReleaseDate = null;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 } 

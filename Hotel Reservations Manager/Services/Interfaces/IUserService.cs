@@ -12,5 +12,6 @@ namespace Hotel_Reservations_Manager.Services.Interfaces
         Task UpdateUserAsync(ApplicationUser user);
         Task DeactivateUserAsync(string id, DateTime releaseDate);
         Task<bool> IsUserActiveAsync(string id);
+        Task ReactivateUserAsync(string id);
     }
 } 

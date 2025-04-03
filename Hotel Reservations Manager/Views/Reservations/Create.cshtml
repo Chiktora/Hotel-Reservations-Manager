@@ -50,6 +50,15 @@
             
             <div class="form-group">
                 <label class="control-label">Clients</label>
+                <div class="input-group mb-3">
+                    <input type="text" id="clientSearch" class="form-control" placeholder="Search clients...">
+                    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                        <i class="fas fa-plus"></i> Add New Client
+                    </button>
+                </div>
+                <div id="searchResults" class="list-group mb-3" style="max-height: 200px; overflow-y: auto; display: none;">
+                    <!-- Search results will be populated here -->
+                </div>
                 <select name="clientIds" id="clientsSelect" class="form-control" multiple>
                     @if (ViewBag.Clients != null)
                     {
@@ -70,7 +79,7 @@
                         }
                     }
                 </select>
-                <small class="form-text text-muted">Hold Ctrl to select multiple clients (Selected: <span id="selectedCount">0</span>)</small>
+                <small class="form-text text-muted">Selected clients: <span id="selectedCount">0</span></small>
                 <span class="text-danger field-validation-error" id="clientValidationMessage"></span>
             </div>
             
@@ -104,13 +113,184 @@
     </div>
 </div>
 
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addClientForm">
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNumber" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="isAdult" checked>
+                        <label class="form-check-label" for="isAdult">Is Adult</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveClientBtn">Save Client</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
         $(document).ready(function() {
-            // Update selected count on page load
-            updateSelectedClientCount();
+            let searchTimeout;
+            
+            // Client search functionality
+            $('#clientSearch').on('input', function() {
+                clearTimeout(searchTimeout);
+                const searchTerm = $(this).val();
+                
+                if (searchTerm.length >= 3) {
+                    searchTimeout = setTimeout(function() {
+                        $.get('/Clients/Search', { term: searchTerm }, function(data) {
+                            const $searchResults = $('#searchResults');
+                            $searchResults.empty();
+                            
+                            if (data.length > 0) {
+                                data.forEach(client => {
+                                    const $item = $(`<a href="#" class="list-group-item list-group-item-action">
+                                        ${client.firstName} ${client.lastName}
+                                        <small class="text-muted">${client.isAdult ? '(Adult)' : '(Child)'}</small>
+                                    </a>`);
+                                    
+                                    $item.click(function(e) {
+                                        e.preventDefault();
+                                        addClientToSelection(client);
+                                        $searchResults.hide();
+                                        $('#clientSearch').val('');
+                                    });
+                                    
+                                    $searchResults.append($item);
+                                });
+                                $searchResults.show();
+                            } else {
+                                // No results found - add option to create new client
+                                const names = searchTerm.trim().split(/\s+/);
+                                const $item = $(`<div class="list-group-item">
+                                    <p class="mb-1">No clients found with "${searchTerm}"</p>
+                                    <button class="btn btn-sm btn-primary create-new-client">
+                                        Create New Client
+                                    </button>
+                                </div>`);
+                                
+                                $item.find('.create-new-client').click(function(e) {
+                                    e.preventDefault();
+                                    // Populate the modal with the search term split into names
+                                    if (names.length >= 2) {
+                                        $('#firstName').val(names[0]);
+                                        $('#lastName').val(names.slice(1).join(' '));
+                                    } else if (names.length === 1) {
+                                        $('#firstName').val(names[0]);
+                                        $('#lastName').val('');
+                                    }
+                                    $('#addClientModal').modal('show');
+                                    $searchResults.hide();
+                                });
+                                
+                                $searchResults.append($item);
+                                $searchResults.show();
+                            }
+                        });
+                    }, 300);
+                } else {
+                    $('#searchResults').hide();
+                }
+            });
+            
+            // Hide search results when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#clientSearch, #searchResults, .create-new-client').length) {
+                    $('#searchResults').hide();
+                }
+            });
+            
+            // Add new client functionality
+            $('#saveClientBtn').click(function() {
+                const clientData = {
+                    firstName: $('#firstName').val(),
+                    lastName: $('#lastName').val(),
+                    email: $('#email').val(),
+                    phoneNumber: $('#phoneNumber').val(),
+                    isAdult: $('#isAdult').is(':checked')
+                };
+                
+                $.ajax({
+                    url: '/Clients/CreateAjax',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(clientData),
+                    success: function(response) {
+                        if (response.success) {
+                            addClientToSelection(response.client);
+                            $('#addClientModal').modal('hide');
+                            $('#addClientForm')[0].reset();
+                            $('#clientSearch').val('');
+                            
+                            // Show success message
+                            const alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">')
+                                .text('Client added successfully!')
+                                .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+                            $('.col-md-12').prepend(alert);
+                        } else {
+                            // Show error message
+                            const alert = $('<div class="alert alert-danger alert-dismissible fade show" role="alert">')
+                                .text('Error adding client: ' + response.message)
+                                .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+                            $('.modal-body').prepend(alert);
+                        }
+                    },
+                    error: function() {
+                        const alert = $('<div class="alert alert-danger alert-dismissible fade show" role="alert">')
+                            .text('Error adding client. Please try again.')
+                            .append('<button type="button" class="btn-close" data-bs-dismiss="alert"></button>');
+                        $('.modal-body').prepend(alert);
+                    }
+                });
+            });
+            
+            // Clear modal form when it's closed
+            $('#addClientModal').on('hidden.bs.modal', function() {
+                $('#addClientForm')[0].reset();
+                $('.alert').remove();
+            });
+            
+            function addClientToSelection(client) {
+                const $select = $('#clientsSelect');
+                const option = new Option(
+                    `${client.firstName} ${client.lastName}`,
+                    client.id,
+                    false,
+                    true
+                );
+                $select.append(option);
+                updateSelectedClientCount();
+                validateRoomCapacity();
+            }
             
             // Update selected count and validate when selection changes
             $('#clientsSelect').on('change', function() {
@@ -135,7 +315,6 @@
                 var roomText = selectedRoom.text();
                 var capacityMatch = roomText.match(/Capacity: (\d+)/);
                 
-                // Only validate if we can determine capacity
                 if (capacityMatch && capacityMatch.length > 1) {
                     var capacity = parseInt(capacityMatch[1]);
                     var selectedClients = $('#clientsSelect option:selected').length;
@@ -143,12 +322,14 @@
                     if (selectedClients > capacity) {
                         $('#clientValidationMessage').text('Warning: You have selected more clients (' + 
                             selectedClients + ') than the room capacity (' + capacity + ')');
-                        // Don't disable the button, just warn
                     } else {
                         $('#clientValidationMessage').text('');
                     }
                 }
             }
+            
+            // Initialize
+            updateSelectedClientCount();
         });
     </script>
 } 

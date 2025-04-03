@@ -1,3 +1,4 @@
+@using System.Linq
 @{
     ViewData["Title"] = "Reservation Analytics";
 }
@@ -131,13 +132,13 @@
                                         <td>@checkIn.Room.RoomNumber</td>
                                         <td>@checkIn.CheckInDate.ToShortDateString()</td>
                                         <td>
-                                            @if (checkIn.ReservationClients.Any())
+                                            @if (checkIn.ReservationClients != null && checkIn.ReservationClients.Count > 0)
                                             {
-                                                var client = checkIn.ReservationClients.First().Client;
+                                                var client = checkIn.ReservationClients[0].Client;
                                                 <span>@client.FirstName @client.LastName</span>
-                                                if (checkIn.ReservationClients.Count() > 1)
+                                                if (checkIn.ReservationClients.Count > 1)
                                                 {
-                                                    <span class="text-muted ms-1">+@(checkIn.ReservationClients.Count() - 1)</span>
+                                                    <span class="text-muted ms-1">+@(checkIn.ReservationClients.Count - 1)</span>
                                                 }
                                             }
                                             else

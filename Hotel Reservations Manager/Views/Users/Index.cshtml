@@ -54,6 +54,10 @@
                     {
                         <a asp-action="Deactivate" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Deactivate</a>
                     }
+                    else
+                    {
+                        <a asp-action="Reactivate" asp-route-id="@item.Id" class="btn btn-sm btn-success">Reactivate</a>
+                    }
                 </td>
             </tr>
         }

@@ -105,5 +105,50 @@ namespace Hotel_Reservations_Manager.Controllers
             await _clientService.DeleteClientAsync(id);
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Search(string term)
+        {
+            if (string.IsNullOrEmpty(term) || term.Length < 3)
+            {
+                return Json(new List<object>());
+            }
+
+            var clients = await _clientService.SearchClientsAsync(term);
+            var result = clients.Select(c => new
+            {
+                id = c.Id,
+                firstName = c.FirstName,
+                lastName = c.LastName,
+                isAdult = c.IsAdult
+            });
+
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateAjax([FromBody] Client client)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { success = false, message = "Invalid client data" });
+            }
+
+            try
+            {
+                await _clientService.CreateClientAsync(client);
+                return Json(new { success = true, client = new
+                {
+                    id = client.Id,
+                    firstName = client.FirstName,
+                    lastName = client.LastName,
+                    isAdult = client.IsAdult
+                }});
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 } 

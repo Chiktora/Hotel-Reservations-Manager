@@ -9,15 +9,22 @@ namespace Hotel_Reservations_Manager.Controllers
     public class RoomsController : Controller
     {
         private readonly IRoomService _roomService;
+        private readonly IReservationService _reservationService;
 
-        public RoomsController(IRoomService roomService)
+        public RoomsController(
+            IRoomService roomService,
+            IReservationService reservationService)
         {
             _roomService = roomService;
+            _reservationService = reservationService;
         }
 
         public async Task<IActionResult> Index(int? capacity, RoomType? type, bool? isAvailable, int page = 1)
         {
             const int pageSize = 10;
+            
+            // Update room availability based on current reservations
+            await _reservationService.UpdateRoomAvailabilityAsync();
             
             var rooms = await _roomService.FilterRoomsAsync(capacity, type, isAvailable, page, pageSize);
 

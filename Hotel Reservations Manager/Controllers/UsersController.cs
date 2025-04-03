@@ -202,5 +202,24 @@ namespace Hotel_Reservations_Manager.Controllers
             await _userService.DeactivateUserAsync(id, DateTime.Now);
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> Reactivate(string id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReactivateConfirmed(string id)
+        {
+            await _userService.ReactivateUserAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
     }
 } 
