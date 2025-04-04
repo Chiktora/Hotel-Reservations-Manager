@@ -7,8 +7,7 @@
 
 A comprehensive hotel management system designed to streamline reservation operations, manage room inventory, and provide analytics for hotel administrators.
 
-## ✨ Features  NIGGERNIGGERNIGGERNIGGERNIGGERNIGGERNIGGER
-
+## ✨ Features  
 ### 🔑 User Management
 - Role-based access control (Admin, Manager, Staff)
 - User registration and authentication
